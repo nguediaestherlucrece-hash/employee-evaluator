@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: title"><title>Questions générées</title></head>
+<body>
+<div th:replace="fragments/layout :: layout(~{::section})">
+<section>
+    <h2 class="mb-4"><i class="fas fa-question-circle me-2 text-primary"></i>Questions d'entretien générées</h2>
+
+    <!-- Étapes -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="step done"><i class="fas fa-check"></i></div><small class="text-muted">Upload CV</small>
+        <div class="flex-grow-1 border-top"></div>
+        <div class="step active">2</div><small class="fw-bold text-primary">Questions prêtes</small>
+        <div class="flex-grow-1 border-top"></div>
+        <div class="step pending">3</div><small class="text-muted">Réponses</small>
+        <div class="flex-grow-1 border-top"></div>
+        <div class="step pending">4</div><small class="text-muted">Rapport</small>
+    </div>
+
+    <div class="alert alert-warning">
+        <i class="fas fa-eye-slash me-2"></i>
+        <strong>Mode discret activé.</strong> Ces questions sont conçues pour paraître naturelles.
+        Posez-les lors d'une conversation informelle avec l'employé. Ne mentionnez pas qu'il s'agit d'une évaluation.
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white">
+            <strong th:text="'Évaluation de : ' + ${session.employee.fullName}">Employé</strong>
+            <span class="ms-3 text-muted" th:text="'Poste : ' + ${session.employee.poste}">Poste</span>
+        </div>
+    </div>
+
+    <!-- Liste des questions -->
+    <div th:if="${questions != null}" class="row g-3">
+        <div class="col-12" th:each="question, qStat : ${questions}">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="badge bg-primary rounded-pill fs-6 px-3 py-2"
+                             th:text="${qStat.index + 1}">1</div>
+                        <div class="flex-grow-1">
+                            <p class="fs-5 fw-semibold mb-2" th:text="${question.question}">Question</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-tag me-1"></i>
+                                        <span th:text="${question.categorie}">catégorie</span>
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-bullseye me-1"></i>
+                                        <em th:text="${question.objectif}">objectif</em>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fallback si JSON non parsable -->
+    <div th:if="${questionsRaw != null}" class="card shadow-sm">
+        <div class="card-body">
+            <pre th:text="${questionsRaw}" class="mb-0"></pre>
+        </div>
+    </div>
+
+    <!-- Boutons d'action -->
+    <div class="mt-4 d-flex gap-3">
+        <a th:href="@{/evaluation/reponses/{id}(id=${session.id})}"
+           class="btn btn-success btn-lg flex-grow-1">
+            <i class="fas fa-pen me-2"></i>J'ai posé toutes les questions — Saisir les réponses
+        </a>
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-lg">
+            <i class="fas fa-print me-2"></i>Imprimer
+        </button>
+    </div>
+</section>
+</div>
+</body>
+</html>

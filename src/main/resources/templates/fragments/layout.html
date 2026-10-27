@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:fragment="title">EvalPro — Système d'Évaluation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style th:fragment="base-styles">
+        :root {
+            --primary: #003d7a;
+            --accent: #0066cc;
+            --success: #198754;
+        }
+        body { background: #f4f6f9; }
+        .sidebar {
+            background: var(--primary);
+            min-height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0; left: 0;
+            padding-top: 1rem;
+        }
+        .sidebar .brand { color: white; font-size: 1.2rem; font-weight: bold; padding: 1rem 1.5rem; }
+        .sidebar .nav-link { color: rgba(255,255,255,0.8); padding: .6rem 1.5rem; border-radius: 4px; margin: 2px 8px; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: rgba(255,255,255,0.15); color: white; }
+        .main-content { margin-left: 250px; padding: 2rem; }
+        .card-stat { border-left: 4px solid var(--accent); border-radius: 8px; }
+        .badge-niveau { font-size: .85rem; padding: .4em .8em; border-radius: 20px; }
+        .step-indicator .step { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .step.active { background: var(--accent); color: white; }
+        .step.done { background: var(--success); color: white; }
+        .step.pending { background: #dee2e6; color: #6c757d; }
+    </style>
+</head>
+<body>
+<div th:fragment="layout(content)">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="brand"><i class="fas fa-user-check me-2"></i>EvalPro</div>
+        <ul class="nav flex-column mt-3">
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/evaluation/nouveau}"><i class="fas fa-plus-circle me-2"></i>Nouvelle évaluation</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/sessions}"><i class="fas fa-list me-2"></i>Historique</a>
+            </li>
+            <li class="nav-item mt-auto pt-4">
+                <form th:action="@{/logout}" method="post" style="padding: 0 8px;">
+                    <button type="submit" class="nav-link border-0 bg-transparent w-100 text-start">
+                        <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main -->
+    <div class="main-content">
+        <div th:if="${successMsg}" class="alert alert-success alert-dismissible">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${successMsg}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${errorMsg}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:replace="${content}"></div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

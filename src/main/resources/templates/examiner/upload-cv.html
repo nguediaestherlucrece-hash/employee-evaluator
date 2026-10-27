@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: title"><title>Nouvelle évaluation</title></head>
+<body>
+<div th:replace="fragments/layout :: layout(~{::section})">
+<section>
+    <h2 class="mb-4"><i class="fas fa-upload me-2 text-primary"></i>Nouvelle évaluation — Upload du CV</h2>
+
+    <!-- Étapes -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="step active">1</div><small class="fw-bold text-primary">Upload CV</small>
+        <div class="flex-grow-1 border-top"></div>
+        <div class="step pending">2</div><small class="text-muted">Questions</small>
+        <div class="flex-grow-1 border-top"></div>
+        <div class="step pending">3</div><small class="text-muted">Réponses</small>
+        <div class="flex-grow-1 border-top"></div>
+        <div class="step pending">4</div><small class="text-muted">Rapport</small>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-file-upload me-2"></i>Informations de l'évaluation
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/evaluation/upload-cv}" method="post" enctype="multipart/form-data" id="uploadForm">
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Discrétion garantie.</strong> L'employé évalué ne sera pas informé de cette démarche.
+                            Les questions générées sont formulées pour paraître naturelles.
+                        </div>
+
+                        <!-- Infos employé -->
+                        <h6 class="fw-bold text-muted mb-3 text-uppercase">Informations de l'employé</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nom complet <span class="text-danger">*</span></label>
+                                <input type="text" name="employeNom" class="form-control" required placeholder="Ex: Jean Dupont">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Poste actuel / visé <span class="text-danger">*</span></label>
+                                <input type="text" name="poste" class="form-control" required placeholder="Ex: Développeur Java Senior">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Département</label>
+                                <input type="text" name="departement" class="form-control" placeholder="Ex: DSI, RH, Finance...">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nom de l'examinateur <span class="text-danger">*</span></label>
+                                <input type="text" name="examinateurName" class="form-control" required placeholder="Votre nom">
+                            </div>
+                        </div>
+
+                        <!-- CV -->
+                        <h6 class="fw-bold text-muted mb-3 text-uppercase">CV de l'employé</h6>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Fichier CV <span class="text-danger">*</span></label>
+                            <input type="file" name="cvFile" class="form-control" required accept=".pdf,.docx,.txt"
+                                   id="cvFileInput">
+                            <div class="form-text">Formats acceptés : PDF, DOCX, TXT — Max 10 MB</div>
+                            <div id="filePreview" class="mt-2 d-none">
+                                <span class="badge bg-success fs-6"><i class="fas fa-file-check me-1"></i><span id="fileName"></span></span>
+                            </div>
+                        </div>
+
+                        <!-- Nombre de questions -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Nombre de questions à générer</label>
+                            <input type="range" name="nombreQuestions" class="form-range"
+                                   min="5" max="20" value="10" id="nbQuestionsRange"
+                                   oninput="document.getElementById('nbQuestionsValue').textContent = this.value">
+                            <div class="d-flex justify-content-between">
+                                <small>5 questions</small>
+                                <strong><span id="nbQuestionsValue">10</span> questions</strong>
+                                <small>20 questions</small>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100" id="submitBtn">
+                            <i class="fas fa-magic me-2"></i>Générer les questions via l'IA
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</div>
+<script>
+document.getElementById('cvFileInput').addEventListener('change', function() {
+    const preview = document.getElementById('filePreview');
+    const nameSpan = document.getElementById('fileName');
+    if (this.files.length > 0) {
+        nameSpan.textContent = this.files[0].name;
+        preview.classList.remove('d-none');
+    } else {
+        preview.classList.add('d-none');
+    }
+});
+
+document.getElementById('uploadForm').addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyse du CV en cours...';
+    btn.disabled = true;
+});
+</script>
+</body>
+</html>

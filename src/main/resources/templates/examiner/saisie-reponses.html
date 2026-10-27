@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: title"><title>Saisie des réponses</title></head>
+<body>
+<div th:replace="fragments/layout :: layout(~{::section})">
+<section>
+    <h2 class="mb-4"><i class="fas fa-edit me-2 text-primary"></i>Saisie des réponses de l'employé</h2>
+
+    <!-- Étapes -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="step done"><i class="fas fa-check"></i></div><small class="text-muted">Upload CV</small>
+        <div class="flex-grow-1 border-top"></div>
+        <div class="step done"><i class="fas fa-check"></i></div><small class="text-muted">Questions</small>
+        <div class="flex-grow-1 border-top"></div>
+        <div class="step active">3</div><small class="fw-bold text-primary">Saisie des réponses</small>
+        <div class="flex-grow-1 border-top"></div>
+        <div class="step pending">4</div><small class="text-muted">Rapport</small>
+    </div>
+
+    <div class="alert alert-info">
+        <i class="fas fa-microphone me-2"></i>
+        Reportez ici les réponses données <strong>oralement</strong> par l'employé. 
+        Soyez aussi fidèle que possible aux mots utilisés.
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <strong th:text="'Évaluation de : ' + ${session.employee.fullName}">Employé</strong>
+            <span class="ms-3 badge bg-secondary" th:text="${session.employee.poste}">Poste</span>
+        </div>
+    </div>
+
+    <form id="reponsesForm">
+        <input type="hidden" id="sessionId" th:value="${session.id}">
+
+        <div th:if="${questions != null}" id="questionsContainer">
+            <div class="card shadow-sm mb-3" th:each="question, qStat : ${questions}">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="badge bg-primary me-2" th:text="${qStat.index + 1}">1</span>
+                        <strong th:text="${question.question}">Question</strong>
+                        <input type="hidden" class="question-text" th:value="${question.question}">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label text-muted small">Réponse de l'employé (telle que rapportée oralement)</label>
+                        <textarea class="form-control reponse-field" rows="3"
+                                  placeholder="Décrivez ce que l'employé a répondu..."
+                                  required></textarea>
+                    </div>
+                    <div>
+                        <label class="form-label text-muted small">Votre appréciation (optionnel)</label>
+                        <div class="d-flex gap-2">
+                            <label th:each="note : ${#numbers.sequence(1, 5)}" class="d-flex align-items-center gap-1">
+                                <input type="radio" class="note-radio" th:name="'note_' + ${qStat.index}" th:value="${note}">
+                                <span th:text="${note} + '★'">★</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="button" onclick="soumettreReponses()" class="btn btn-success btn-lg w-100" id="submitBtn">
+                <i class="fas fa-brain me-2"></i>Analyser avec l'IA et générer le rapport
+            </button>
+        </div>
+    </form>
+</section>
+</div>
+<script>
+async function soumettreReponses() {
+    const sessionId = parseInt(document.getElementById('sessionId').value);
+    const questionCards = document.querySelectorAll('#questionsContainer .card');
+    const questionReponses = [];
+
+    for (let i = 0; i < questionCards.length; i++) {
+        const card = questionCards[i];
+        const question = card.querySelector('.question-text').value;
+        const reponse = card.querySelector('.reponse-field').value.trim();
+        const noteRadio = card.querySelector('input.note-radio:checked');
+
+        if (!reponse) {
+            card.querySelector('.reponse-field').classList.add('is-invalid');
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        const qr = { question, reponse };
+        if (noteRadio) qr.noteExaminateur = parseInt(noteRadio.value);
+        questionReponses.push(qr);
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyse en cours par l\'IA GROQ...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/evaluation/soumettre-reponses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, questionReponses })
+        });
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = data.redirectUrl;
+        } else {
+            alert('Erreur: ' + data.error);
+            btn.innerHTML = '<i class="fas fa-brain me-2"></i>Analyser avec l\'IA';
+            btn.disabled = false;
+        }
+    } catch (e) {
+        alert('Erreur réseau: ' + e.message);
+        btn.innerHTML = '<i class="fas fa-brain me-2"></i>Analyser avec l\'IA';
+        btn.disabled = false;
+    }
+}
+</script>
+</body>
+</html>

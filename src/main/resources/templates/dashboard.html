@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: title">
+    <title>Dashboard — EvalPro</title>
+</head>
+<body>
+<div th:replace="fragments/layout :: layout(~{::section})">
+<section>
+    <h2 class="mb-4"><i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard</h2>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card card-stat shadow-sm p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">Employés enregistrés</div>
+                        <div class="fs-2 fw-bold text-primary" th:text="${totalEmployes}">0</div>
+                    </div>
+                    <i class="fas fa-users fa-2x text-primary opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-stat shadow-sm p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">Sessions totales</div>
+                        <div class="fs-2 fw-bold text-info" th:text="${sessions.size()}">0</div>
+                    </div>
+                    <i class="fas fa-clipboard-list fa-2x text-info opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-stat shadow-sm p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">Rapports générés</div>
+                        <div class="fs-2 fw-bold text-success" th:text="${rapportsGeneres}">0</div>
+                    </div>
+                    <i class="fas fa-file-alt fa-2x text-success opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action rapide -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body text-center py-4">
+            <h5>Démarrer une nouvelle évaluation</h5>
+            <p class="text-muted">Uploadez le CV d'un employé pour générer les questions d'entretien</p>
+            <a th:href="@{/evaluation/nouveau}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus-circle me-2"></i>Nouvelle évaluation
+            </a>
+        </div>
+    </div>
+
+    <!-- Dernières sessions -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white fw-bold">
+            <i class="fas fa-history me-2"></i>Dernières évaluations
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Employé</th><th>Poste</th><th>Examinateur</th>
+                        <th>Score</th><th>Niveau</th><th>Statut</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="session : ${sessions}" th:if="${sessionStat.index < 10}">
+                        <td th:text="${session.employee.fullName}">-</td>
+                        <td th:text="${session.employee.poste}">-</td>
+                        <td th:text="${session.examinateurName}">-</td>
+                        <td>
+                            <span th:if="${session.scoreGlobal != null}"
+                                  th:text="${session.scoreGlobal + '%'}"
+                                  th:class="${session.scoreGlobal >= 75 ? 'badge bg-success' : (session.scoreGlobal >= 50 ? 'badge bg-warning text-dark' : 'badge bg-danger')}">-</span>
+                            <span th:unless="${session.scoreGlobal != null}" class="text-muted">—</span>
+                        </td>
+                        <td>
+                            <span th:if="${session.niveauEstime != null}"
+                                  th:text="${session.niveauEstime}"
+                                  class="badge badge-niveau bg-info text-dark">-</span>
+                        </td>
+                        <td>
+                            <span th:switch="${session.status.name()}">
+                                <span th:case="'RAPPORT_GENERE'" class="badge bg-success"><i class="fas fa-check"></i> Terminé</span>
+                                <span th:case="'REPONSES_SOUMISES'" class="badge bg-warning text-dark">En analyse</span>
+                                <span th:case="'QUESTIONS_GENEREES'" class="badge bg-info text-dark">Questions prêtes</span>
+                                <span th:case="*" class="badge bg-secondary">En cours</span>
+                            </span>
+                        </td>
+                        <td>
+                            <a th:if="${session.status.name() == 'RAPPORT_GENERE'}"
+                               th:href="@{/evaluation/rapport/{id}(id=${session.id})}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a th:if="${session.status.name() == 'QUESTIONS_GENEREES'}"
+                               th:href="@{/evaluation/reponses/{id}(id=${session.id})}"
+                               class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${sessions.empty}">
+                        <td colspan="7" class="text-center text-muted py-4">Aucune évaluation pour l'instant</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</div>
+</body>
+</html>
